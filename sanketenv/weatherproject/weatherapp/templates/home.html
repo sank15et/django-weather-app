@@ -1,0 +1,144 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Weather Pro</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600&display=swap" rel="stylesheet">
+
+<style>
+body{
+    font-family:Poppins,sans-serif;
+    background-size:cover;
+    background-position:center;
+    transition:.4s;
+}
+.overlay{
+    background:linear-gradient(180deg,rgba(0,0,0,.55),rgba(0,0,0,.25));
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+}
+.weather-card{
+    max-width:520px;
+    background:rgba(255,255,255,.18);
+    backdrop-filter: blur(12px);
+    color:#fff;
+    border-radius:18px;
+    padding:2rem;
+    box-shadow:0 20px 40px rgba(0,0,0,.4);
+    animation:fadeIn .6s ease;
+}
+h1{font-weight:600;}
+.city-name{letter-spacing:2px;}
+.info-box{
+    background:rgba(255,255,255,.25);
+    border-radius:12px;
+    padding:1rem;
+}
+body.dark{
+    filter:brightness(.85);
+}
+@keyframes fadeIn{
+from{opacity:0; transform:translateY(30px);}
+to{opacity:1; transform:translateY(0);}
+}
+</style>
+</head>
+
+<body style="background-image:url('{% if exception_occurred or not image_url %}https://images.pexels.com/photos/3008509/pexels-photo-3008509.jpeg{% else %}{{ image_url }}{% endif %}');">
+
+<div class="overlay">
+<div class="container d-flex justify-content-center">
+
+<div class="weather-card text-center">
+
+<div class="d-flex justify-content-between mb-3">
+<h4>🌤 Weather Pro</h4>
+<button id="themeToggle" class="btn btn-sm btn-outline-light">🌙</button>
+</div>
+
+<button class="btn btn-outline-info w-100 mb-3" onclick="getLocation()">
+📍 Detect My Location
+</button>
+
+<form method="POST" onsubmit="showLoader()" class="input-group mb-3">
+{% csrf_token %}
+<input class="form-control" name="city" placeholder="Search city..." required>
+<button class="btn btn-primary">Search</button>
+</form>
+
+<div id="loader" class="d-none text-center mb-3">
+<div class="spinner-border text-light"></div>
+<p class="mt-2">Fetching weather...</p>
+</div>
+
+<div class="row align-items-center mb-4">
+
+<div class="col-6 text-start">
+<h1>{{ temp }}°</h1>
+<h5 class="city-name">{{ city }}</h5>
+<p class="text-light">{{ day }}</p>
+</div>
+
+<div class="col-6">
+<img src="https://openweathermap.org/img/wn/{{ icon }}@2x.png">
+<p>{{ description|title }}</p>
+</div>
+
+</div>
+
+<div class="row g-2">
+
+<div class="col-4">
+<div class="info-box">Tomorrow<br>28° ☀</div>
+</div>
+
+<div class="col-4">
+<div class="info-box">Day 2<br>27° 🌥</div>
+</div>
+
+<div class="col-4">
+<div class="info-box">Day 3<br>26° 🌧</div>
+</div>
+
+</div>
+
+</div>
+</div>
+</div>
+
+{% if exception_occurred %}
+<script>alert("City not found — showing default weather");</script>
+{% endif %}
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+const toggle = document.getElementById("themeToggle");
+toggle.onclick = () => {
+ document.body.classList.toggle("dark");
+ toggle.innerText = document.body.classList.contains("dark") ? "☀" : "🌙";
+}
+
+function showLoader(){
+ document.getElementById("loader").classList.remove("d-none");
+}
+
+function getLocation(){
+ navigator.geolocation.getCurrentPosition(pos=>{
+ fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${pos.coords.latitude}&longitude=${pos.coords.longitude}`)
+ .then(res=>res.json())
+ .then(data=>{
+ document.querySelector("input[name='city']").value=data.city;
+ });
+ });
+}
+</script>
+
+</body>
+</html>
