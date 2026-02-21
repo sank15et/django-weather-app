@@ -1,0 +1,1 @@
+gunicorn weatherproject.wsgi:application
