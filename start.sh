@@ -1,1 +1,1 @@
-gunicorn weatherproject.wsgi:application
+gunicorn weatherproject.weatherproject.wsgi:application
